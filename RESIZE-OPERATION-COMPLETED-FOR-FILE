@@ -1,0 +1,48 @@
+RESIZE OPERATION COMPLETED FOR FILE
+***********************************************************************************
+
+APPLIES TO:
+**************
+Oracle Database - Enterprise Edition - Version 12.1.0.2 and later
+Information in this document applies to any platform.
+
+SYMPTOMS
+**************
+File extension messages are seen in alert log. There are no explicit file resize DDS as well.
+
+
+Resize operation completed for file# 3, old size 8427520K, new size 8437760K
+Thu Dec 27 13:14:29 2018
+Thread 1 advanced to log sequence 409459 (LGWR switch)
+  Current log# 1 seq# 409459 mem# 0: +DATAC1/DBPBLLAB/ONLINELOG/group_1.309.882447911
+  Current log# 1 seq# 409459 mem# 1: +RECOC1/DBPBLLAB/ONLINELOG/group_1.1466.882447911
+Thu Dec 27 13:14:30 2018
+Archived Log entry 615751 added for thread 1 sequence 409458 ID 0x209e3723 dest 1:
+Thu Dec 27 15:03:19 2018
+Resize operation completed for file# 3, old size 8437760K, new size 8448000K
+
+
+In a busy system with lots of DML (insert/update/delete),the alert log could be flooded with many such file extension messages.
+
+CAUSE
+**********
+These file extension messages were result of diagnostic enhancement through unpublished to record automatic datafile resize operations in the alert log with a message of the form:
+
+ "File NN has auto extended from x bytes to y bytes"
+
+This can be useful when diagnosing problems which may be impacted by a file resize.
+
+
+SOLUTION
+***********
+In busy systems, the alert log could be completely flooded with file extension messages. A new Hidden parameter parameter "_disable_file_resize_logging" has been introduced through bug 18603375 to stop these messages getting logged into alert log.
+
+(Unpublished) Bug 18603375 - EXCESSIVE FILE EXTENSION MESSAGE IN ALERT LOG 
+
+Set the below parameter along with the fix.
+
+SQL> alter system set "_disable_file_resize_logging"=TRUE ; (Its default value is FALSE)
+
+
+*** ORACLE DOCUMENT ID: Doc ID 1982901.1
+*** Follow oracle matelink format
